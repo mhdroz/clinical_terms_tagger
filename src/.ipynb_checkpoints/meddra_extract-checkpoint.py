@@ -1,9 +1,11 @@
 import pandas as pd
 from multiprocessing import Pool
 import spacy
+from spacy.matcher import PhraseMatcher
 import numpy as np
 import argparse
 import sys, os
+from os.path import exists
 import pickle
 import time
 import HP
@@ -13,17 +15,15 @@ from snorkel.labeling import LFAnalysis
 from snorkel.labeling.model.baselines import MajorityLabelVoter
 from snorkel.labeling.model.label_model import LabelModel
 from snorkel.utils import probs_to_preds
-#from nltk.tokenize import RegexpTokenizer
-from utils import get_meddra_concepts_df, map_meddra_hier_v2, normalize_dtype
+from utils import get_meddra_concepts_df, map_meddra_hier_v2, normalize_dtype, create_matcher
 from maps import *
-#from google.cloud import storage
 
-#tokenizer = RegexpTokenizer(r'\w+')
+#To run the tagger: nohup python meddra_extract.py --task 'tag' --label_model 'label_model' --threads 28 --datasource bucket > extract_meddra_NO_existing_matcher.out&
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--label_model', dest='label_model', help='Define which weak labeling model to use: majority_voter or label_model', default='majority_voter', type=str)
- #   parser.add_argument('--task', dest='task', help='Define which task: tagging, labeling, training, label-train, full', default='labeling', type=str)
+    parser.add_argument('--task', dest='task', help='Define which task: tag, label', default='tag', type=str)
     parser.add_argument('--threads', dest='threads', help='Select number of processes', default=1, type=int)
     parser.add_argument('--datasource', dest='datasource', help='Select data source: local or bucket', default='local', type=str)
     parser.add_argument('--restart', dest='restart', help='Restart processing. Only valid of using bucket datasource.', default=False, type=str2bool)
@@ -37,7 +37,6 @@ def parse_args():
 
 
 def extract_concepts(df):
-#def extract_concepts(df, nlp=nlp, matcher=matcher, meddraID_CUI_table=meddraID_CUI_table, llt_to_pt=llt_to_pt, meddra_hier=meddra_hier):
     """
     Clinical concepts extraction and padding of sequences for LSTM training for the labeling step
 
@@ -58,12 +57,8 @@ def extract_concepts(df):
     print("done extracting medDRA terms  in time {:.2f}".format(time.time()-start))
 
     print("Mapping MedDRA IDs up the hierarchy:")
-    #extracted_hier = map_meddra_hier(extracted_df, meddraID_CUI_table, llt_to_pt, meddra_hier)
     extracted_hier = map_meddra_hier_v2(extracted_df, meddraID_CUI_table, llt_to_pt, meddra_hier, termino_matcher)
     extracted_hier = normalize_dtype(extracted_hier)
-
-    #print("Saving extractions...")
-    #extracted_hier.to_parquet(HP.extracted_hier)
 
     return extracted_hier
 
@@ -82,7 +77,6 @@ def label_extractions(df_tagged, label_model):
     hx = hx['label'].to_list()
 
     #Define LFs
-
     ABSTAIN = -1
     PRESENT = 1
     ABSENT = 0
@@ -214,112 +208,101 @@ def str2bool(v):
 if __name__ == '__main__':
     args = parse_args()
 
- #   task = args.task
+    task = args.task
     label_model = args.label_model
     threads = args.threads
     datasource = args.datasource
     restart = args.restart
 
- #   if task == 'tag':
- #       print("Selected task: Clinical concepts extraction.")
- #       print('Loading dataset:')
-
- #       df = pd.read_parquet(HP.raw_notes)
-
- #       print("Loading SpaCy model and MedDRA matcher:")
- #       nlp = spacy.load(HP.spacy_model)
- #       matcher = pickle.load(open(HP.matcher, 'rb'))
-
- #       meddraID_CUI_table = pd.read_csv(HP.meddraID_CUI_table, sep='|')
- #       llt_to_pt = pd.read_csv(HP.llt_to_pt, sep='|')
- #       meddra_hier = pd.read_csv(HP.meddra_hier, sep='|')
- #       termino_matcher = pd.read_csv(HP.termino_matcher, sep='|')
+    print("Check for matcher:")
+    if exists(HP.matcher):
+        print("Matcher exists")
+    else:
+        print("No matcher found, creating matcher")
         
- #       extracted_hier = extract_concepts(df, nlp, matcher,  meddraID_CUI_table, llt_to_pt, meddra_hier)
+        create_matcher(HP.spacy_language, HP.termino_matcher, HP.spacy_model, HP.matcher)
 
- #       print("Saving extractions...")
- #       extracted_hier.to_parquet(HP.extracted_hier)
+    
 
-
-
- #   if task == 'label':
- #       print("Selected task: Weak labeling only.")
- #       print("Loading tagged dataset:")
-
- #       extracted_hier = pd.read_parquet(HP.extracted_hier)
-
- #       df_tagged, preds_train, prob_train = label_extractions(extracted_hier, label_model)
-
- #       df_tagged = get_labels(df_tagged)
-
- #       df_tagged.to_parquet(HP.labeled_dataset)
- #       pickle.dump(preds_train, open(HP.snorkel_preds, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
- #       pickle.dump(prob_train, open(HP.snorkel_probs, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-
- #       print("All done!")
-
- #   if task == 'multi':
-    print("Multithreaded tagging")
+    
+    if task == 'tag':    
         
-    print("Loading SpaCy model and MedDRA matcher:")
-    nlp = spacy.load(HP.spacy_model)
-    matcher = pickle.load(open(HP.matcher, 'rb'))
+        print("Multithreaded tagging")
+        
+        print("Loading SpaCy model and MedDRA matcher:")
+        nlp = spacy.load(HP.spacy_model)
+        matcher = pickle.load(open(HP.matcher, 'rb'))
 
-    meddraID_CUI_table = pd.read_csv(HP.meddraID_CUI_table, sep='|')
-    llt_to_pt = pd.read_csv(HP.llt_to_pt, sep='|')
-    meddra_hier = pd.read_csv(HP.meddra_hier, sep='|')
-    termino_matcher = pd.read_csv(HP.termino_matcher, sep='|')
+        meddraID_CUI_table = pd.read_csv(HP.meddraID_CUI_table, sep='|')
+        llt_to_pt = pd.read_csv(HP.llt_to_pt, sep='|')
+        meddra_hier = pd.read_csv(HP.meddra_hier, sep='|')
+        termino_matcher = pd.read_csv(HP.termino_matcher, sep='|')
 
-    print('Loading dataset:')
-    if datasource == 'local':
-        print("Loading data from local disk")
+        print('Loading dataset:')
+        if datasource == 'local':
+            print("Loading data from local disk")
 
-        df = pd.read_parquet(HP.raw_notes)
-        df = df.reset_index(drop=True)
+            df = pd.read_parquet(HP.raw_notes)
+            df = df.reset_index(drop=True)
             
-        extracted_hier = parallelize_dataframe(df, extract_concepts, n_cores=threads)
+            extracted_hier = parallelize_dataframe(df, extract_concepts, n_cores=threads)
 
-        print("Saving extractions...")
-        extracted_hier.to_parquet(HP.extracted_hier)
+            print("Saving extractions...")
+            extracted_hier.to_parquet(HP.extracted_hier)
             
-    if datasource == 'bucket':
-        print("Loading data from gcp bucket %s" % HP.bucket_name)
+        if datasource == 'bucket':
+            print("Loading data from gcp bucket %s" % HP.bucket_name)
             
-        df = pd.read_parquet('gs://%s/%s' % (HP.bucket_name, HP.blob))
+            df = pd.read_parquet('gs://%s/%s' % (HP.bucket_name, HP.blob))
             
-        print(df.shape)
-            #df = df[['Patient Id', 'Date', 'Title', 'Text']].rename(columns={'Patient Id':'person_id', 'Date':'note_DATE',
-            #                                                    'Title':'note_title', 'Text':'note_text'})
-        df['length'] = df['note_text'].apply(lambda x: len(x))
-        df = df.loc[df['length'] > 10]
-        print(df.shape)
+            df['length'] = df['note_text'].apply(lambda x: len(x))
+            df = df.loc[df['length'] > 10]
+            print(df.shape)
             
-        batches = int(df.shape[0] / 20000)
-        interval = int(df.shape[0] / batches)
+            batches = int(df.shape[0] / 20000)
+            if batches == 0:
+                interval = 1
+            else:
+                interval = int(df.shape[0] / batches)
             
-        if restart == False:
-            print('start processing data from batch 0')
-            for i in range(0, batches+1):
+            if restart == False:
+                print('start processing data from batch 0')
+                for i in range(0, batches+1):
                 #for i in range(0, 4):
-                if i % 10 == 0:
-                    print('processing batch %03d' % (i))
-                select = df.iloc[i*interval:(i+1)*interval]
+                    if i % 10 == 0:
+                        print('processing batch %03d' % (i))
+                    select = df.iloc[i*interval:(i+1)*interval]
 
-                extracted_hier = parallelize_dataframe(select, extract_concepts, n_cores=threads)
+                    extracted_hier = parallelize_dataframe(select, extract_concepts, n_cores=threads)
 
-                print("Saving extractions...")
-                extracted_hier.to_parquet(HP.path_output + 'extracted_notes_%03d.parquet' % (i+HP.batchid))
+                    print("Saving extractions...")
+                    extracted_hier.to_parquet(HP.path_output + 'extracted_notes_%03d.parquet' % (i+HP.batchid))
 
-        if restart == True:
-            print('Restarting processing from batch %s' % HP.restart_batch)
-            for i in range(HP.restart_batch, batches+1):
-            #for i in range(0,5):
-                if i % 10 == 0:
-                    print('processing batch %03d' % (i))
-                select = df.iloc[i*interval:(i+1)*interval]
+            if restart == True:
+                print('Restarting processing from batch %s' % HP.restart_batch)
+                for i in range(HP.restart_batch, batches+1):
+                    if i % 10 == 0:
+                        print('processing batch %03d' % (i))
+                    select = df.iloc[i*interval:(i+1)*interval]
 
-                extracted_hier = parallelize_dataframe(select, extract_concepts, n_cores=threads)
+                    extracted_hier = parallelize_dataframe(select, extract_concepts, n_cores=threads)
 
-                print("Saving extractions...")
-                extracted_hier.to_parquet(HP.path_output + 'extracted_notes_%03d.parquet' % (i+HP.batchid))
+                    print("Saving extractions...")
+                    extracted_hier.to_parquet(HP.path_output + 'extracted_notes_%03d.parquet' % (i+HP.batchid))
 
+
+    if task == 'label':
+        print("Selected task: Weak labeling only.")
+        print("Loading tagged dataset:")
+
+        extracted_hier = pd.read_parquet(HP.extracted_hier)
+
+        df_tagged, preds_train, prob_train = label_extractions(extracted_hier, label_model)
+
+        df_tagged = get_labels(df_tagged)
+
+        df_tagged.to_parquet(HP.labeled_dataset)
+        pickle.dump(preds_train, open(HP.snorkel_preds, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(prob_train, open(HP.snorkel_probs, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+
+        print("All done!")

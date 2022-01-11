@@ -3,21 +3,23 @@
 #####################################################
 
 #Parameters
-dataset = 'CVD_train'
-note_type = 'office_notes_2012_2016'
-bucket_name = 'cvd-cohort-20210102'
-blob = 'office_notes/progress_notes_2012_2016_3.parquet'
+spacy_language = 'en_core_sci_md'
+
+dataset = 'prototype'
+note_type = 'omop_notes_NO_existing_matcher'
+bucket_name = 'covid-2021-11-05'
+blob = 'covid_notes_proto.parquet'
 labeling_model = 'LM'
 BatchID = 'BATCHID'
 threads = 'THREADS'
 restart_batch = 4
-batchid = 93
+batchid = 0
 
 #Paths
 #path_project = '/share/pi/stamang/covid/'
 path_termino = '/home/jupyter/res/term/'
-path_output = '/home/jupyter/marie/outputs/meddra_extracter/'+dataset+'/'+note_type+'/'
-
+path_output = '/home/jupyter/marie/code/clinical_terms_tagger/prototype/output/'+dataset+'/'+note_type+'/'
+#path_model = '/home/jupyter/res/matchers/radlex_pruned_en_core_sci_md/'
 
 
 #Datasets
@@ -32,8 +34,8 @@ termino_matcher = path_termino + 'meddra_termino.txt'
 #raw_notes = path_project + 'data/notes_'+dataset+'/mini_batches/notes_covidBATCHID.parquet'
 
 #NLP
-spacy_model = '/home/jupyter/res/matchers/matcher_en_core_sci_md/'
-matcher = '/home/jupyter/res/matchers/matcher_en_core_sci_md/meddra_v23_matcher.p'
+spacy_model = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/'
+matcher = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher_test.p'
 
 
 #Outputs

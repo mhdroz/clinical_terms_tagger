@@ -27,7 +27,7 @@ for jobid in joblist:
     #os.system('sed -i "s/BATCHID2/%02d/g" %s' % (jobid, input_file))
     os.system('sed -i "s/BATCHID/%03d/g" %s' % (jobid, header_file))
     print('starting the job:')
-    os.system("nohup python meddra_extract.py --label_model 'label_model' --task 'label' > label_meddra.out &")
+    os.system("nohup python meddra_extract.py --task 'label' --label_model 'label_model'  > label_meddra.out &")
     time.sleep(0.5)
 
     os.chdir('../../')
