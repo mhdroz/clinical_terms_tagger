@@ -15,7 +15,7 @@ from snorkel.labeling import LFAnalysis
 from snorkel.labeling.model.baselines import MajorityLabelVoter
 from snorkel.labeling.model.label_model import LabelModel
 from snorkel.utils import probs_to_preds
-from utils import get_meddra_concepts_df, map_meddra_hier_v2, normalize_dtype, create_matcher
+from utils import get_meddra_concepts_df, map_meddra_hier, normalize_dtype, create_matcher
 from maps import *
 
 #To run the tagger: nohup python meddra_extract.py --task 'tag' --label_model 'label_model' --threads 28 --datasource bucket > extract_meddra_NO_existing_matcher.out&
@@ -57,7 +57,7 @@ def extract_concepts(df):
     print("done extracting medDRA terms  in time {:.2f}".format(time.time()-start))
 
     print("Mapping MedDRA IDs up the hierarchy:")
-    extracted_hier = map_meddra_hier_v2(extracted_df, meddraID_CUI_table, llt_to_pt, meddra_hier, termino_matcher)
+    extracted_hier = map_meddra_hier(extracted_df, meddraID_CUI_table, llt_to_pt, meddra_hier, termino_matcher)
     extracted_hier = normalize_dtype(extracted_hier)
 
     return extracted_hier
@@ -255,13 +255,14 @@ if __name__ == '__main__':
             
             df = pd.read_parquet('gs://%s/%s' % (HP.bucket_name, HP.blob))
             
-            df['length'] = df['note_text'].apply(lambda x: len(x))
-            df = df.loc[df['length'] > 10]
+            #df['length'] = df['note_text'].apply(lambda x: len(x))
+            #df = df.loc[df['length'] > 10]
+            
             print(df.shape)
             
             batches = int(df.shape[0] / 20000)
             if batches == 0:
-                interval = 1
+                interval = int(df.shape[0] / 1)
             else:
                 interval = int(df.shape[0] / batches)
             

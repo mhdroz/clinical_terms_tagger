@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 def lookup_cui(medid, meddra_map):
-    #tag = ['NEGEX', 'FAM', 'HX']
-    #if medid not in tag:
     match = (meddra_map['code'] == int(medid))
     CUI = meddra_map['CUI'][match]
     if CUI.empty:
