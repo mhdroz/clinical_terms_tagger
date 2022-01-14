@@ -11,7 +11,7 @@ What to install and how to instal them
 - Instructions for where to find the base termino for WL
 - Packages to install
 
-This code uses the [MedDRA](https://www.meddra.org) terminology as source for clinical concepts extraction. In order to use the terminology, a [subscritpion](https://www.meddra.org/how-to-use/support-documentation/english/welcome) is needed. Once access to the terminology files have been granted, 
+This code uses the [MedDRA](https://www.meddra.org) terminology as source for clinical concepts extraction. In order to use the terminology, a [subscritpion](https://www.meddra.org/how-to-use/support-documentation/english/welcome) is needed. Once access to the terminology files have been granted, concatenate all single level files into one terminology file for the creation of the tagger and save the terminology file in res/. 
 
 ```
 Give examples
@@ -25,7 +25,7 @@ Describe each step for a successful run:
 
 _include an example with a dummy termino and open source notes_
 
-1. in the src/ directory, run the following command:
+1. Update the paths and file names in HP.py. In the src/ directory, run the following command:
 ```
 nohup python meddra_extract.py --task 'tag' --label_model 'label_model' --threads 28 --datasource local > extract_meddra.out&
 ```
