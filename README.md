@@ -18,14 +18,10 @@ open science and reproducibility values.
 ## Getting started
 
 ### Prerequisite
-What to install and how to instal them
-- Instructions to get the meddra terminology and which files are needed to build the tagger
-- Instructions for where to find the base termino for WL
-- Packages to install
 
 The project was built using the Anaconda distribution of python 3.6.12. To run the code, clone this repository and use the Anaconda environment manager to create an environment using the `environment.yml` file to install the tagger code dependencies.
 
-This code uses the [MedDRA](https://www.meddra.org) terminology as source for clinical concepts extraction. In order to use the terminology, a [subscritpion](https://www.meddra.org/how-to-use/support-documentation/english/welcome) is needed. Once access to the terminology files have been granted, concatenate all single level files into one terminology file for the creation of the tagger and save the terminology file in res/. 
+This code uses the [MedDRA](https://www.meddra.org) terminology as source for clinical concepts extraction. In order to use the terminology, a [subscritpion](https://www.meddra.org/how-to-use/support-documentation/english/welcome) is needed. Once access to the terminology files have been granted, concatenate all single level files into one terminology file for the creation of the tagger and save the terminology file in res/termino.txt with the following structure: `code|term|level`. 
 
 The base terminology for the weak supervision part can be found there:
 
@@ -53,7 +49,8 @@ python setup_wl.py start_idx end_idx > wl.out&
 ```
 python setup_cleaning.py start_idx end_idx n_threads > clean.out&
 ```
-
+### Example with dummy data
+An example with a dummy terminology file and notes is provided in example/
 
 
 ## License
