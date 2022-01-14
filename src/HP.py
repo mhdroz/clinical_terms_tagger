@@ -3,8 +3,9 @@
 #####################################################
 
 #Parameters
+spacy_language = 'en_core_sci_md'
 dataset = 'prototype'
-note_type = 'brain_radiology'
+note_type = 'omop_notes_existing_matcher_v2'
 bucket_name = 'covid-2021-11-05'
 blob = 'covid_notes_proto.parquet'
 labeling_model = 'LM'
@@ -25,11 +26,9 @@ llt_to_pt = path_termino + 'llt_to_pt.txt'
 meddra_hier = path_termino + 'med_hier.txt'
 termino_matcher = path_termino + 'meddra_termino.txt'
 
-raw_notes = '/home/jupyter/marie/code/clinical_terms_tagger/prototype/data/brain_radiology.parquet'
-
 #NLP
-spacy_model = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/'
-matcher = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher_test.p'
+spacy_model = '/home/jupyter/res/matchers/matcher_en_core_sci_md/'
+matcher = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher.p'
 
 
 #Outputs

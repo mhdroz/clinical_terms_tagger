@@ -248,7 +248,7 @@ if __name__ == '__main__':
             extracted_hier = parallelize_dataframe(df, extract_concepts, n_cores=threads)
 
             print("Saving extractions...")
-            extracted_hier.to_parquet(HP.path_output + 'extracted_notes.parquet')
+            extracted_hier.to_parquet(HP.extracted_hier)
             
         if datasource == 'bucket':
             print("Loading data from gcp bucket %s" % HP.bucket_name)
