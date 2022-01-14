@@ -11,6 +11,8 @@ What to install and how to instal them
 - Instructions for where to find the base termino for WL
 - Packages to install
 
+This code uses the [MedDRA](https://www.meddra.org) terminology as source for clinical concepts extraction. In order to use the terminology, a [subscritpion](https://www.meddra.org/how-to-use/support-documentation/english/welcome) is needed. Once access to the terminology files have been granted, 
+
 ```
 Give examples
 ```
