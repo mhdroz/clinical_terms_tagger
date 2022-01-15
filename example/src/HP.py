@@ -15,7 +15,7 @@ restart_batch = 4
 batchid = 0
 
 #Paths
-path_termino = '../../res/'
+path_termino = '../res/'
 path_output = '../output/'+dataset+'/'+note_type+'/'
 
 
@@ -27,8 +27,8 @@ meddra_hier = path_termino + 'med_hier.txt'
 termino_matcher = path_termino + 'meddra_termino.txt'
 
 #NLP
-spacy_model = '../../res/matchers/matcher_en_core_sci_md/'
-matcher = '../../res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher.p'
+spacy_model = '../res/matchers/matcher_en_core_sci_md/'
+matcher = '../res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher.p'
 
 
 #Outputs
