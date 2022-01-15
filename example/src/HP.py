@@ -4,10 +4,10 @@
 
 #Parameters
 spacy_language = 'en_core_sci_md'
-dataset = 'prototype'
-note_type = 'omop_notes_existing_matcher_v2'
-bucket_name = 'covid-2021-11-05'
-blob = 'covid_notes_proto.parquet'
+dataset = 'example'
+note_type = 'example'
+bucket_name = 'bucket'
+blob = 'notes_proto.parquet'
 labeling_model = 'LM'
 BatchID = 'BATCHID'
 threads = 'THREADS'
@@ -15,8 +15,8 @@ restart_batch = 4
 batchid = 0
 
 #Paths
-path_termino = '/home/jupyter/res/term/'
-path_output = '/home/jupyter/marie/code/clinical_terms_tagger/prototype/output/'+dataset+'/'+note_type+'/'
+path_termino = '../../res/'
+path_output = '../output/'+dataset+'/'+note_type+'/'
 
 
 #Datasets
@@ -27,8 +27,8 @@ meddra_hier = path_termino + 'med_hier.txt'
 termino_matcher = path_termino + 'meddra_termino.txt'
 
 #NLP
-spacy_model = '/home/jupyter/res/matchers/matcher_en_core_sci_md/'
-matcher = '/home/jupyter/res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher.p'
+spacy_model = '../../res/matchers/matcher_en_core_sci_md/'
+matcher = '../../res/matchers/matcher_en_core_sci_md_test/meddra_v23_matcher.p'
 
 
 #Outputs
